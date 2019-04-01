@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "diagnostics": false,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "stripInternal": true,
+    "pretty": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noUnusedLocals": true,
+    "jsx": "react",
+    "baseUrl": "./",
+    "outDir": "./docs",
+    "lib": ["es2017", "dom", "esnext.asynciterable"]
+  },
+  "exclude": ["docs"],
+  "include": ["src/**/*", "test/**/*"]
+}
