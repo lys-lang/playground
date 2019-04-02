@@ -57,30 +57,35 @@ monaco.languages.setLanguageConfiguration("lys", {
 
 /// --- EXPORTS ---
 
+import { HidratedWebSystem } from "lys-compiler/dist/support/HidratedWebSystem";
+
+export const monacoSystem = new HidratedWebSystem();
+
 export { monaco };
 
-export function ensureMonacoModel(path: string, content: string): void {
-  let model = getModel(path);
-  if (!model) {
-    model = createModel(path, "lys", content);
-  } else {
-    if (model.getValue() !== content) {
-      model.setValue(content);
+export function getModel(path: string, create = true) {
+  const model = monaco.editor.getModels().find(model => model.uri.path === path);
+  if (model) return model;
+  if (create && monacoSystem.fileExists(path)) {
+    const content = monacoSystem.readFile(path);
+    if (content) {
+      return createModel(path, undefined, content);
     }
   }
+  return null;
 }
 
-export function getModel(path: string) {
-  return monaco.editor.getModels().find(model => model.uri.path === path) || null;
-}
-
-export function createModel(path: string, language: string, value: string) {
+export function createModel(path: string, language: string | undefined, value: string) {
   const uri = monaco.Uri.file(path);
-  console.log(monaco.editor.getModels());
+
   const model = monaco.editor.createModel(value, language, uri);
   model.updateOptions({
     tabSize: 2,
     insertSpaces: true
+  });
+  monacoSystem.writeFile(uri.path, value);
+  model.onDidChangeContent(() => {
+    monacoSystem.writeFile(uri.path, model.getValue(monaco.editor.EndOfLinePreference.LF, false), false);
   });
   // HACK: to see if the models get disposed with time
   model.onWillDispose(() => console.log("will dispose", model.uri.path));

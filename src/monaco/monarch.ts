@@ -1,34 +1,9 @@
 import { monaco } from ".";
 
 export const monarch: any & monaco.languages.IMonarchLanguage = {
-  keywords: [
-    "type",
-    "impl",
-    "struct",
-    "enum",
-    "fun",
-    "val",
-    "var",
-    "loop",
-    "if",
-    "else",
-    "case",
-    "match",
-    "continue",
-    "break",
-    "is",
-    "as",
-
-    "private",
-    "public",
-    "package",
-    "import",
-    "=",
-    ".",
-    "->"
-  ],
   defaultToken: "invalid",
 
+  keywords: /type|impl|struct|enum|fun|val|var|loop|if|else|case|match|continue|break|is|as|private|public|package|import|=|\.|->/,
   escapes: /\\(?:[nrt\\"'\?]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{6})/,
   identifiers: /(?:[$A-Za-z_][A-Za-z0-9_$]*)/,
   operators: /(?:!|\|\||&&|&|\||\+\+|\-\-|\+|\-|==|!=|==|!==|<=|>=|<<|>>>|>>|<|>|\/|\*|\*\*|%|~|\^)/,
@@ -37,35 +12,30 @@ export const monarch: any & monaco.languages.IMonarchLanguage = {
     root: [
       { include: "@whitespace" },
 
-      [/(@identifiers)(\.)/, ["identifier", "keyword.dot"]],
-      [/(@identifiers)(\()/, [{ token: "identifier" }, { token: "@brackets", bracket: "@open", next: "@paren_block" }]],
-      [/(@identifiers)(::)/, ["identifier.namespace", "identifier.namespace"]],
-
       [/(%struct\b)/, "keyword"],
       [/(%wasm\b\s*)(\{)/, [{ token: "keyword" }, { token: "@brackets", bracket: "@open", next: "@wasm" }]],
       [/(\bva[rl]\b\s*)(@identifiers)/, [{ token: "keyword" }, { token: "identifier" }]],
       [/\b(fun\b\s*)(@identifiers|@operators)/, [{ token: "keyword" }, { token: "identifier" }]],
       [/(%wasm\b)/, "invalid"],
 
+      [/(@identifiers)(\.)/, ["identifier", "keyword.dot"]],
+      [/(@identifiers)(\()/, [{ token: "identifier" }, { token: "@brackets", bracket: "@open", next: "@paren_block" }]],
+      [/(@identifiers)(::)/, ["identifier.namespace", "identifier.namespace"]],
+
       // identifiers and operators
       [/[A-Z]@identifiers/, "identifier"],
 
       [
-        /\b@identifiers\b/,
+        /\b@keywords\b/,
         {
           cases: {
-            "@keywords": {
-              cases: {
-                is: { token: "keyword", next: "@type_name" },
-                as: { token: "keyword", next: "@type_name" },
-                impl: { token: "keyword", next: "@type_name" },
-                struct: { token: "keyword", next: "@type_name" },
-                type: { token: "keyword", next: "@alias_type" },
-                enum: { token: "keyword", next: "@type" },
-                "@default": "keyword"
-              }
-            },
-            "@default": "source"
+            is: { token: "keyword", next: "@type_name" },
+            as: { token: "keyword", next: "@type_name" },
+            impl: { token: "keyword", next: "@type_name" },
+            struct: { token: "keyword", next: "@type_name" },
+            type: { token: "keyword", next: "@alias_type" },
+            enum: { token: "keyword", next: "@type" },
+            "@default": "keyword"
           }
         }
       ],
@@ -84,7 +54,7 @@ export const monarch: any & monaco.languages.IMonarchLanguage = {
       [/[;`]/, "invalid"],
 
       // operators
-      [/@operators/, { cases: { "\\-": "operator.minus", "@keywords": "keyword.operator", "@default": "operator" } }],
+      [/@operators/, { cases: { "\\-": "operator.minus", "@default": "operator" } }],
       [/=/, "keyword"]
     ],
 
@@ -203,15 +173,7 @@ export const monarch: any & monaco.languages.IMonarchLanguage = {
 
       // type identifiers
       [/[a-z][0-9]*(?![a-zA-Z_\-])/, "type.identifier.typevar"],
-      [
-        /@identifiers/,
-        {
-          cases: {
-            "@keywords": { token: "@rematch", next: "@pop" },
-            "@default": "type.identifier"
-          }
-        }
-      ],
+      [/@identifiers/, "type.identifier"],
       [/@identifiers(\.?)/, { cases: { $2: ["identifier.namespace", "keyword.dot"], "@default": "type.identifier" } }],
 
       [/::|->|[\.:|]/, "type.operator"],
